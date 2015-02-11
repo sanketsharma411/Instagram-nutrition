@@ -1,0 +1,58 @@
+Given a set of tags, to crawl Instagram for these tags, follow the steps given here:
+Results : This process creates the following files each file is a .txt file with each line saved in a tsv format
+	1) post.txt 
+		- This is the main file with the most of the metadata for each post
+		- Each line is a post with the following format
+		- Format: []
+	2) comments.txt
+		- Each line is a comment
+		- Format: []
+	3) likes.txt
+		- Each line is a like
+		- Format: []
+	4) users.txt
+		- Each line corresponds to the mention of any user
+		- Users can be associated with a post through likes, comments, tags, OP, so this file stores all the users mentioned with all the posts
+		- Format: []
+		user_id | username | full_name | profile_picture_url | bio | website | activity
+		- where activity can be 
+			POST : the user is the OP
+			COMMENT : the user has a comment	 
+			LIKE : the user has liked the post
+			TAG : the user has been tagged in the image
+	5) users_in_photo.txt
+		- Each line is for one user
+		- Format:
+			post_id | x_position | y_position | user_id
+	6) interim_status.txt
+		- It prints the status of the crawl
+		- Format : []
+0) Clone the scripts folder and the file crawl_7Feb.py
+1) Get a list of seed tags in a file preferrably one tag per line [no special characters/non-alphanumeric characters]
+2) Register for an app and get an Access Token
+3) In file crawl_7Feb.py:
+	Set the path in line 2 to pointo to the scripts folder from step 0
+	Set the filename created in step 1 in line 8 as tag_file 
+	Set your Access Token in line  17 as ACCESS_TOKEN
+	Set upon the number of requests per tag in line 20, as the second argument [currently set to 6000]
+		[each tag based request returns 32 posts]
+	Set the sleep time in seconds as the last argument in line 20
+		Instagram has a rate limit of 5000 posts per hour, so a 0.75 seconds sleep time between two requests will be safe
+		Now, it might work with 0.4 seconds coz the code spends around 0.3 seconds parsing the JSON and saving the posts on my machine, try not setting a sleep time less than that
+		
+4) In file scripts/InstaLib.py
+	In lines 150 onwards: 
+		Set the file name for the results, might wanna append the date of the crawl to the names
+	Uncomment lines 193 and 194
+5) Run the crawl with one request, i.e. run the file crawl_7Feb.py with number of requests set to 1
+6) Comment out lines 193 and 194 from scripts/InstaLib.py
+7) Run the crawl for the remaining number of requests
+8) Wait for a long long time.
+
+
+
+	
+	
+		
+	
+	
