@@ -181,17 +181,17 @@ def get_posts_to_file(tag_list,n_requests,ACCESS_TOKEN,sleep = 0):
     #########################################################################################
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
     #########################################################################################
-    # Getting some int object has no attribute timeout error at the start of a new crawl ????
-    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+    # Getting some 'int object has no attribute timeout' error at the start of a new crawl ??
+    # That was to check if you have read the instructions or not, Sucker! # # # # # # # # # #
     #########################################################################################
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
     # Uncomment the next 2 lines                    #########################################
-    # For all the seed tags, make one request       #########################################
-    # Comment the next 2 lines                      #########################################
+    # For all the seed tags, make one request                   #############################
+    # Delete the InstaLib.pyc file and Comment the next 2 lines #############################
     # Continue with the rest of the requests        #########################################
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-    for tag in tag_list:
-        seed_tag_next_url[tag] = query + tag + request + ACCESS_TOKEN + '&count=' + str(32)
+    #for tag in tag_list:
+    #    seed_tag_next_url[tag] = query + tag + request + ACCESS_TOKEN + '&count=' + str(32)
     # Now for actually putting in requests
     for i in range(n_requests):
         # Update the interim_status file
@@ -218,24 +218,24 @@ def get_posts_to_file(tag_list,n_requests,ACCESS_TOKEN,sleep = 0):
                 seed_tag_next_url[tag] = url
 
             except (urllib2.HTTPError) as e:
-                update_interim_status_file(seed_tag_count, seed_tag_next_url, 'HTTP Error')
+                update_interim_status_file(seed_tag_count, seed_tag_next_url, '##############################################HTTP Error##############################################')
                 print 'HTTP ERROR OCCURRED'
                 continue
 				
             except (KeyError) as e:
-                update_interim_status_file(seed_tag_count, seed_tag_next_url, e)
+                update_interim_status_file(seed_tag_count, seed_tag_next_url, '##############################################'+str(e)+'##############################################')
                 #end_crawl(2, data, seed_tag_count, seed_tag_next_url)
                 print 'KeyError Occurred, yet we continue'
                 continue
-            '''
+            
             except Exception, e:
                 #end_crawl(3,e)
-                update_interim_status_file(seed_tag_count, seed_tag_next_url, e)
-                print 'some random error occurred here, yet we continue'
+                update_interim_status_file(seed_tag_count, seed_tag_next_url, '##############################################'+str(e)+'##############################################')
+                print '##############################################some random error occurred here, yet we continue##############################################'
                 print e
-                end_crawl(3,e, seed_tag_count, seed_tag_next_url)
+                #end_crawl(3,e, seed_tag_count, seed_tag_next_url)
                 continue
-            ''' 
+             
             print str(tot_reqs) + ': Time ' + '%.2f' %(time.time()-t1)\
             +'s '+ ' | Total Time = ' +'%.2f' %(time.time()-t0) + " | Tag: "\
             + tag + " | Requests Done :  "+str(seed_tag_count[tag]) +"/"+str(n_requests)
@@ -413,13 +413,13 @@ def update_end_status_file(end_data,seed_tag_count, seed_tag_next_url):
                     
 # ########################### Function to update the interim status
 def update_interim_status_file(seed_tag_count,seed_tag_next_url, text = ''):
-    pp = pprint.PrettyPrinter(indent=4)
+    pp = pprint.PrettyPrinter(indent=1, width=2)
     with open('interim_status.txt', 'a') as f:
-        f.write (str(datetime.datetime.now()) + '\n');
-        f.write (str(text)+ '\t');
-        f.write(pp.pformat(seed_tag_count)+ '\n');
-        f.write(pp.pformat(seed_tag_next_url) + '\n')
-        f.write('Total Requests Made = '+str(sum(seed_tag_count.values()))+'\n')
+        f.write(str(datetime.datetime.now()) + '\n');
+        f.write(str(text));
+        f.write(str(pp.pformat(dict(seed_tag_count)))+ '\n');
+        f.write(str(pp.pformat(dict(seed_tag_next_url))) + '\n')
+        f.write('======================================Total Requests Made = '+str(sum(seed_tag_count.values()))+'=========================================\n')
 
 #############################Sorting Dictionaries
 def sort_dict(dictionary):
