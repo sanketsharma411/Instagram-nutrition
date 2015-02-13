@@ -17,10 +17,10 @@ def setup_api():
     API object and the ACCESS_TOKEN
     """
     print '=========Initialization     ===================='
-    CLIENT_ID = '155d1dc6f29d4806acee4f651630dc52'
-    CLIENT_SECRET = '586f618280ad4ba8abc45ed9cd96fc54'
-    REDIRECT_URI = 'http://www.s-udacity.appspot.com'
-    ACCESS_TOKEN = '1479030016.155d1dc.81cce70e60d9465e9a520b636a6566e5' # For sanketonly
+    CLIENT_ID = ''
+    CLIENT_SECRET = ''
+    REDIRECT_URI = ''
+    ACCESS_TOKEN = '' # For sanketonly
     # To get a new access token, go to 
     # print 'https:/  /instagram.com/oauth/authorize/?client_id='+CLIENT_ID+'&redirect_uri='+REDIRECT_URI+'&response_type=token'
     # sanketonly : user_id = 1479030016
