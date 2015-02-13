@@ -23,7 +23,7 @@ def setup_api():
     ACCESS_TOKEN = '' # For sanketonly
     # To get a new access token, go to 
     # print 'https:/  /instagram.com/oauth/authorize/?client_id='+CLIENT_ID+'&redirect_uri='+REDIRECT_URI+'&response_type=token'
-    # sanketonly : user_id = 1479030016
+ 
 
     #return InstagramAPI(client_id=CLIENT_ID, client_secret=CLIENT_SECRET),ACCESS_TOKEN
     return ACCESS_TOKEN
