@@ -5,11 +5,16 @@ from bs4 import BeautifulSoup
 from collections import defaultdict
 from InstaLib import *
 ########################################################################
-#   Importing stuff for setting the local time
+#   Importing stuff for setting the local time 
+# Edit 19 Feb: This eats up a lot of memory, so skipped it
+#              So skipped all places where this is used
+#			   Stat: Mem usage down from 884MB to 144MB by ingoring this part
 ########################################################################
+'''
 import datetime, pytz
 from tzwhere import tzwhere 
 w = tzwhere.tzwhere()
+'''
 ########################################################################
 #
 # Post to nut
@@ -155,13 +160,13 @@ class Post:
             return st
         else:
             return 'Sorry, the tags : '+self.tags+' matched nothing'
-    
+    '''  EDIT 19 Feb : Commented out everything
     def set_loc_time(self):
-        '''
+        ''
         Given the UTC time, latitude and longitude, This converts the passed time into
         local time, using the lat, lon info passed
         All are expeccted to be floats
-        '''
+        ''
         if self.has_loc == 0:
             self.has_loc_time = False
             return None
@@ -189,7 +194,7 @@ class Post:
         # It adds an extra hour
         self.loc_time = dt_og+offset
         self.has_loc_time = True
-
+	'''
     
     # setting the comments
     def set_comment(self,line):

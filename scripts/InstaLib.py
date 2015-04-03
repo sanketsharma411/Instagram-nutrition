@@ -21,9 +21,9 @@ def setup_api():
     CLIENT_SECRET = ''
     REDIRECT_URI = ''
     ACCESS_TOKEN = '' # For sanketonly
+    ACCESS_TOKEN = ''
     # To get a new access token, go to 
     # print 'https:/  /instagram.com/oauth/authorize/?client_id='+CLIENT_ID+'&redirect_uri='+REDIRECT_URI+'&response_type=token'
- 
 
     #return InstagramAPI(client_id=CLIENT_ID, client_secret=CLIENT_SECRET),ACCESS_TOKEN
     return ACCESS_TOKEN
@@ -45,7 +45,7 @@ def parse_post(instance,tag):
     ##############User######################################
     # Now on to the main user who has posted the image
     s += '\t' + instance['user']['id']
-    user += parse_user(instance['user'],'POST')
+    user += parse_user(instance['user'],post_id,'POST')
 
 
     #############Tags##########################################
@@ -97,7 +97,7 @@ def parse_post(instance,tag):
         c +=  '\t' + clean_text(comment['text'])
         c +=  '\t' + comment['from']['id']
         c +=  '\n'
-        user += parse_user(comment['from'],'COMMENT')
+        user += parse_user(comment['from'],post_id,'COMMENT')
         
     ##########Likes#############################################
     l = ''
@@ -107,7 +107,7 @@ def parse_post(instance,tag):
     
     for user_info in instance['likes']['data']:
         l += user_info['id'] + ','
-        user += parse_user(user_info,'LIKE')
+        user += parse_user(user_info,post_id,'LIKE')
         
     l = l[0:len(l)]
     l += '\n'
@@ -123,7 +123,7 @@ def parse_post(instance,tag):
             u_in_photo += '\t' +str(info['position']['y'])
             u_in_photo += '\t' + info['user']['id']
             u_in_photo += '\n'
-            user += parse_user(info['user'],'TAG')
+            user += parse_user(info['user'],post_id,'TAG')
     else:
         s += '\t' + '0'
     s+= '\n'
@@ -138,6 +138,7 @@ def get_posts_to_file(tag_list,n_requests,ACCESS_TOKEN,sleep = 0):
         comments.txt
         likes.txt
         users_in_photo.txt
+        users.txt
     '''
     #0) Initialize required parameters
     query = "https://api.instagram.com/v1/tags/"
@@ -158,12 +159,14 @@ def get_posts_to_file(tag_list,n_requests,ACCESS_TOKEN,sleep = 0):
     seed_tag_next_url = {}
     # Now check if any previous data file exists
     if not os.path.exists('crawl_data'):
+        print 'Previous Crawl Data Not Found'
         with open('crawl_data','w+') as f:
+            print 'Creating Crawl Data file'
             pickle.dump(seed_tag_count,f)
             pickle.dump(seed_tag_next_url,f)
     with open('crawl_data','r') as f:
-        seed_tag_next_url = pickle.load(f)
         seed_tag_count.update(pickle.load(f))
+        seed_tag_next_url = pickle.load(f)
     #seed_tag_next_url = {}
     #seed_tag_count = defaultdict(int)
     
@@ -175,7 +178,8 @@ def get_posts_to_file(tag_list,n_requests,ACCESS_TOKEN,sleep = 0):
     '''
     # Initializing the interim status
     with open('interim_status.txt', 'a') as f:
-            f.write ('\n=========================='+str(datetime.datetime.now()) + '====================\n')
+        f.write ('\n=================================NEW CRAWL======================================\n')
+        f.write ('=========================='+str(datetime.datetime.now()) + '====================\n')
     # Initializing the next_url_dict
     
     #########################################################################################
@@ -198,19 +202,26 @@ def get_posts_to_file(tag_list,n_requests,ACCESS_TOKEN,sleep = 0):
         update_interim_status_file(seed_tag_count,seed_tag_next_url)
 
         for tag in tag_list :
-            print tag
-            try:
+            
+            ''' # First setting the url '''
+            if tag in seed_tag_next_url:
+                # Check if this seed tag exists in the next_url dict or not
                 url = seed_tag_next_url[tag]
-            except KeyError:
+            else:
+                # If it does not we add it to the next_url dict and intialize its count to 0
+                print 'First Timer',tag
                 seed_tag_next_url[tag] = query + tag + request + ACCESS_TOKEN + '&count=' + str(32)
-                seed_tag_count[tag] = 0
+                seed_tag_count[tag] = 0                
+                '''############### SETTING URL HERE ####################################'''
                 url = seed_tag_next_url[tag]
-            seed_tag_count[tag] += 1
+
             #   define p,c,l,u:
-            #   These will keep a record of the parsed returned JSON i
+            #   These will keep a record of the parsed returned JSON for all the tags
+            #   We will write to file only when we have made a pass over all the 32 responses to each request, to reduce number of write calls
             p = '';c = '';l = '';users = '';u_in_photo = ''
 
             tot_reqs += 1                          # Keeping a count of the total requests
+            seed_tag_count[tag] += 1
             try:
                 response = urllib2.urlopen(url)
                 data = json.load(response)
@@ -218,29 +229,29 @@ def get_posts_to_file(tag_list,n_requests,ACCESS_TOKEN,sleep = 0):
                 seed_tag_next_url[tag] = url
 
             except (urllib2.HTTPError) as e:
-                update_interim_status_file(seed_tag_count, seed_tag_next_url, '##############################################HTTP Error##############################################')
+                
+                update_interim_status_file(seed_tag_count, seed_tag_next_url, '##############################################ERROR##############################################\n##############################################HTTP Error##############################################\n')
                 print 'HTTP ERROR OCCURRED'
-                continue
-				
-            except (KeyError) as e:
-                update_interim_status_file(seed_tag_count, seed_tag_next_url, '##############################################'+str(e)+'##############################################')
-                #end_crawl(2, data, seed_tag_count, seed_tag_next_url)
-                print 'KeyError Occurred, yet we continue'
                 continue
             
             except Exception, e:
                 #end_crawl(3,e)
-                update_interim_status_file(seed_tag_count, seed_tag_next_url, '##############################################'+str(e)+'##############################################')
-                print '##############################################some random error occurred here, yet we continue##############################################'
+                update_interim_status_file(seed_tag_count, seed_tag_next_url, '##############################################ERROR##############################################\n##############################################'+str(e)+'##############################################\n')
                 print e
+                print '===================================================',seed_tag_next_url[tag]
                 #end_crawl(3,e, seed_tag_count, seed_tag_next_url)
                 continue
+            
+            '''except (KeyError) as e:
+                update_interim_status_file(seed_tag_count, seed_tag_next_url, '##############################################ERROR##############################################\n##############################################'+str(e)+'##############################################\n')
+                #end_crawl(2, data, seed_tag_count, seed_tag_next_url)
+                print 'KeyError Occurred, yet we continue'
+                continue
+                '''
              
-            print str(tot_reqs) + ': Time ' + '%.2f' %(time.time()-t1)\
-            +'s '+ ' | Total Time = ' +'%.2f' %(time.time()-t0) + " | Tag: "\
-            + tag + " | Requests Done :  "+str(seed_tag_count[tag]) +"/"+str(n_requests)
+            print str(tot_reqs) + ': Time ' + '%.2f' %(time.time()-t1)            +'s '+ ' | Total Time = ' +'%.2f' %(time.time()-t0) + " | Tag: "            + tag + " | Requests Done :  "+str(seed_tag_count[tag]) +"/"+str(n_requests)
             t1 = time.time()
-
+            
             #   for each instance in data
             for instance in data['data']:
                 #   get new p,c,l,u and update the old ones.
@@ -343,13 +354,26 @@ def clean_text(st):
 # The above gives us all the information about the user with user_id
 #    return str(st['id']) + '\t' +str(st['username'])+'\t' +str(clean_text(st['full_name'])) +'\t' + str(st['profile_picture'])
 ################################################################################################
-def parse_user(st,activity):
+def parse_user(st,post_id,activity):
     user_info = str(st['id']) + '\t' +str(st['username'])+'\t' +str(clean_text(st['full_name'])) +'\t' + str(st['profile_picture']) + '\t'
-    try: user_info += st['bio'] + '\t'
+
+    try:
+        if st['bio'] != '':
+            user_info += st['bio'] + '\t'
+        else:
+            user_info += 'NA' + '\t'
     except KeyError: user_info += 'NA' + '\t'
-    try: user_info += st['website'] + '\t'
+
+    try: 
+        if st['website'] != '':
+            user_info += st['website'] + '\t'
+        else:
+            user_info += 'NA' + '\t'
     except KeyError: user_info += 'NA' + '\t'
+
+    user_info += str(post_id)+'\t'
     user_info += activity + '\n'
+
     return user_info
         
 ################################################################################################
@@ -398,6 +422,9 @@ def end_crawl(end_code, end_data, seed_tag_count, seed_tag_next_url):
 #   Also pickle both of these to 'end_status' named file
 def update_end_status_file(end_data,seed_tag_count, seed_tag_next_url):
     pp = pprint.PrettyPrinter(indent=4)
+
+    update_interim_status_file(seed_tag_count,seed_tag_next_url, '==============================END OF CRAWL======================================')
+
     with open('status.txt','w') as f:
         f.write(str(datetime.datetime.now()) + '\n' + str(end_data)+'\n')
         f.write('=============Tag Counts==================\n')
@@ -406,20 +433,26 @@ def update_end_status_file(end_data,seed_tag_count, seed_tag_next_url):
         f.write(pp.pformat(seed_tag_next_url))
 
     with open('crawl_data','w') as f:
-        pickle.dump(seed_tag_next_url,f)
         pickle.dump(seed_tag_count,f)
-        f.close()
-        
+        pickle.dump(seed_tag_next_url,f)
+        f.close()        
                     
 # ########################### Function to update the interim status
 def update_interim_status_file(seed_tag_count,seed_tag_next_url, text = ''):
     pp = pprint.PrettyPrinter(indent=1, width=2)
+
+    # Update the Interim Status file
     with open('interim_status.txt', 'a') as f:
         f.write(str(datetime.datetime.now()) + '\n');
-        f.write(str(text));
-        f.write(str(pp.pformat(dict(seed_tag_count)))+ '\n');
-        f.write(str(pp.pformat(dict(seed_tag_next_url))) + '\n')
+        f.write(str(text)+'\n');
+        f.write(str(pp.pformat(dict(seed_tag_count)))+ '\n');        
+        f.write(str(pp.pformat(dict(seed_tag_next_url))) + '\n')        
         f.write('======================================Total Requests Made = '+str(sum(seed_tag_count.values()))+'=========================================\n')
+
+    # Update the Crawl_data file
+    with open('crawl_data','w+') as f:
+        pickle.dump(seed_tag_count,f)
+        pickle.dump(seed_tag_next_url,f)   
 
 #############################Sorting Dictionaries
 def sort_dict(dictionary):
