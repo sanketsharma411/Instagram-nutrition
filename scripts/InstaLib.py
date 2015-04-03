@@ -8,8 +8,7 @@ from collections import defaultdict
 #from pytagcloud.lang.counter import get_tag_counts
 """
 ==========Instagram Library Functions===========================
-This file contains all the functions which ever need to be created, so, write all the functions
-over here, and import this file
+Okay, so do not use the parseposts functions from this file, instead use the new script parse_posts.py, built specifically for this purpose
 """
 def setup_api():
     """
