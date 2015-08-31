@@ -1,3 +1,9 @@
+# User defined
+.gitattributes
+.gitginore
+.pyc
+.data
+
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
