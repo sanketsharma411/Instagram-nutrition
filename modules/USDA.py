@@ -180,13 +180,17 @@ def select_ids(id_params, **kwargs):
     implemented here. Use kwargs to pass relevant parameters for the selection 
     method. 
 
-    The default way is to select all the ids
+    The default matching is to select all the ids
 
     input : 
     
         ids_params is the tuple obtained from tag2id
-        len_match_dict from tag2len_match_dict(tags)
-    
+        
+        keyword-arguments:
+        	maximal_len : Boolean
+        		True => Select USDA ids based on maximal length matching
+        		else => Default matching
+
     output: list of ids
     '''
     
