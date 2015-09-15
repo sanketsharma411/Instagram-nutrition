@@ -1,4 +1,4 @@
-## instagram-food 
+## instagram-nutrition    
 
 Flask-app for analyzing nutrient values for food related posts on Instagram
 
@@ -17,3 +17,4 @@ Setup:
 4. Front-End
 
 
+    
